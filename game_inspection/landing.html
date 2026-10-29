@@ -1,0 +1,1309 @@
+<!DOCTYPE html><html lang="ko"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>반짝 ✨ 결! 합!</title>
+    
+    <meta property="og:title" content="반짝 ✨ 결! 합!">
+    <meta property="og:description" content="두뇌 풀가동! 다 함께 즐기는 눈치싸움 두뇌 보드게임 🧠">
+    <meta property="og:image" content="og.png">
+    <meta property="og:type" content="website">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&amp;display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-grad-1: #1a2a3a; --bg-grad-2: #0f172a;
+            --box-bg: rgba(255, 255, 255, 0.05); --box-border: rgba(255, 255, 255, 0.1);
+            --primary: #00cec9; --secondary: #0984e3;
+            --accent: #ffeaa7; --danger: #ff7675; --success: #55efc4;
+            --text-main: #f5f6fa;
+        }
+
+        body { font-family: 'Jua', sans-serif; text-align: center; background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2)); color: var(--text-main); margin: 0; padding: 20px; min-height: 100vh; }
+        .container { max-width: 1100px; margin: 0 auto; background: var(--box-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 30px 20px; border-radius: 24px; border: 1px solid var(--box-border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { font-size: 38px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
+        h1:hover { transform: scale(1.05); color: var(--accent); }
+        .main-title-row { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:8px; margin:0 auto 10px; }
+        .main-title-row h1 { margin:0; }
+        .qr-share-btn { display:inline-flex; align-items:center; justify-content:center; gap:5px; min-height:40px; margin:0; padding:8px 12px; border:1px solid rgba(255,255,255,.3); border-radius:12px; color:#20243b; background:#fff; font-size:14px; white-space:nowrap; box-shadow:0 4px 12px rgba(0,0,0,.16); }
+        .qr-share-btn:hover { color:#5d49b0; background:#f7f4ff; }
+        .qr-share-modal { position:relative; width:min(88%,390px); max-height:88vh; overflow:auto; padding:24px; color:#20243b; background:#fff; border:1px solid #e6e0f0; }
+        .qr-share-modal h3 { margin:0 30px 8px 0; color:#5d49b0; font-size:22px; }
+        .qr-share-modal p { margin:0 0 14px; color:#667085; font-size:14px; line-height:1.5; }
+        .qr-share-close { position:absolute; top:12px; right:12px; width:38px; height:38px; margin:0; padding:0; border:1px solid #e7e3ef; border-radius:50%; color:#5d49b0; background:#f7f4fb; font-size:22px; box-shadow:none; }
+        #share-qr-code { display:grid; place-items:center; width:min(100%,300px); min-height:220px; margin:0 auto 12px; padding:12px; border:1px solid #ece8f3; border-radius:16px; background:#fff; }
+        #share-qr-code img, #share-qr-code canvas { display:block; max-width:100%; height:auto !important; }
+        #share-qr-url { overflow-wrap:anywhere; margin:0 0 12px; color:#667085; font:12px/1.5 system-ui,sans-serif; }
+        .qr-share-dismiss { width:100%; margin:0; color:#fff; background:#7360c7; }
+
+        @media (max-width: 600px) {
+            .main-title-row { gap:6px; }
+            h1 {
+                font-size: 24px;
+                gap: 4px !important;
+                letter-spacing: -0.6px;
+                white-space: nowrap;
+            }
+            h1 span {
+                font-size: 0.42em !important;
+            }
+            .qr-share-btn { min-height:36px; padding:7px 9px; font-size:12px; }
+            .qr-share-modal { padding:22px 18px; }
+        }
+
+        .btn-restart { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e2e8f0; font-size: 15px; padding: 6px 18px; border-radius: 20px; margin-bottom: 25px; box-shadow: none; cursor: pointer; transition: 0.2s; font-family: 'Jua', sans-serif; }
+        .btn-restart:hover { background: rgba(255,255,255,0.25); color: #fff; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
+        button { padding: 14px 24px; font-size: 18px; cursor: pointer; color: white; border: none; border-radius: 12px; margin: 10px; font-family: 'Jua'; transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.3); }
+        button:active { transform: translateY(1px); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        button:disabled { cursor: not-allowed; opacity: 0.7; transform: none; box-shadow: none; }
+        .single-mode-btn { background: #8b5cf6; width: 80%; height: 60px; margin-top: 15px; color: #fff; }
+        input, select { padding: 14px; font-size: 18px; border: 1px solid var(--box-border); background: rgba(0,0,0,0.2); color: white; border-radius: 12px; margin: 5px; width: 80%; font-family: 'Jua'; box-sizing: border-box; }
+        
+        .hidden { display: none !important; }
+
+        .guide-details { background: rgba(0,0,0,0.2); border: 1px solid var(--box-border); border-radius: 12px; margin: 0 auto 25px auto; width: 80%; text-align: left; transition: all 0.3s ease; }
+        .guide-details summary { padding: 12px 15px; font-size: 16px; cursor: pointer; color: var(--primary); list-style: none; text-align: center; outline: none; }
+        .guide-details summary::-webkit-details-marker { display: none; }
+        .guide-details[open] summary { border-bottom: 1px solid var(--box-border); color: var(--accent); }
+        .guide-content { padding: 15px 20px; font-size: 15px; line-height: 1.6; color: #ddd; }
+        .guide-content p { margin: 8px 0; }
+        .guide-content span.hl { color: var(--accent); }
+        
+        .layout-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; align-items: stretch; }
+        .box-panel { flex: 1; min-width: 320px; max-width: 480px; background: rgba(0,0,0,0.2); padding: 25px; border-radius: 20px; border: 1px solid var(--box-border); display: flex; flex-direction: column; }
+        
+        #qrcode { background: white; padding: 20px; border-radius: 20px; margin: 15px auto; display: inline-flex; justify-content: center; width: 100%; max-width: 380px; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        #qrcode img, #qrcode canvas { width: 100% !important; height: auto !important; }
+
+        .badge-container { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-start; align-content: flex-start; flex: 1; }
+        .player-badge { background: var(--secondary); padding: 8px 14px; border-radius: 20px; font-size: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 5px; height: fit-content; }
+        .player-score { background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 10px; font-size: 13px; color: var(--accent); }
+
+        #card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 15px; }
+        .card { aspect-ratio: 1 / 1; border-radius: 12px; display: flex; justify-content: center; align-items: center; cursor: pointer; position: relative; border: 4px solid transparent; transition: transform 0.1s; }
+        .card:active { transform: scale(0.95); } 
+        .card.selected { border-color: var(--primary); transform: scale(0.95); box-shadow: 0 0 15px var(--primary); }
+        
+        .card-num { position: absolute; top: 5px; left: 8px; font-size: 14px; font-weight: bold; color: rgba(255,255,255,0.8); text-shadow: 1px 1px 2px #000; }
+        .shape { width: 55%; height: 55%; margin: 0; }
+        .circle { border-radius: 50%; }
+        .triangle { width: 0; height: 0; border-left: 25px solid transparent; border-right: 25px solid transparent; border-bottom: 45px solid; transform: translateY(-2px); margin: 0; }
+        .square { border-radius: 8px; }
+
+        #student-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 25px; }
+        #student-controls button { margin: 0; width: 100%; height: 60px; font-size: 24px; border-radius: 30px; }
+        #btn-hap-shout.selecting { font-size: 16px !important; }
+
+        #student-timer-display { color:var(--accent); font-size:20px; font-weight:bold; margin-bottom:10px; text-align:center; background:rgba(0,0,0,0.5); padding:8px; border-radius:10px; border: 2px solid var(--danger); }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .modal-box { background: #2d3436; border: 2px solid var(--primary); border-radius: 20px; padding: 30px; width: 85%; max-width: 380px; text-align: center; }
+        .modal-box h3 { color: var(--primary); margin-top: 0; font-size: 26px;}
+        .modal-box p { font-size: 18px; margin-bottom: 25px; line-height: 1.5; color: #f1f2f6; word-break: keep-all; }
+        .modal-btn { width: 45%; border-radius: 10px; }
+        .modal-btn.cancel { background: var(--danger); }
+</style>
+    <link rel="stylesheet" href="../classroom-games/game-ui.css?v=1">
+    <style>
+        .single-mode-note { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:10px; margin:0 0 18px; color:#756b88; font-size:14px; }
+        .single-mode-note button { width:auto !important; margin:0 !important; padding:9px 14px !important; border-radius:999px !important; font-size:13px !important; }
+        .single-elapsed-clock { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border:1px solid #e5def1; border-radius:999px; color:#62518d; background:#f7f4fb; font-size:12px; font-variant-numeric:tabular-nums; line-height:1.2; }
+        .single-ranking-open { display:block; width:80% !important; height:60px !important; margin:0 auto !important; padding:14px 24px !important; border-radius:13px !important; font-size:15px !important; }
+        .single-name-form { display:grid; gap:12px; text-align:left; }
+        .single-name-form label { color:#403650; font-size:13px; font-weight:800; }
+        .single-name-form input { width:100% !important; margin:0 !important; }
+        .single-name-actions { display:flex; gap:8px; }
+        .single-name-actions button { flex:1; width:auto !important; margin:0 !important; }
+        .single-name-actions button[type="submit"] { color:#fff !important; background:#7360c7 !important; border:1px solid #7360c7 !important; box-shadow:0 6px 14px #7360c71f !important; font-weight:700; }
+        .single-name-actions button[type="submit"]:hover { color:#fff !important; background:#5d49b0 !important; border-color:#5d49b0 !important; }
+        #single-nickname-error { min-height:20px; margin:0 !important; color:#b83c62 !important; font-size:13px; }
+        .single-rank-modal { display:flex; flex-direction:column; max-width:540px; max-height:86vh; padding:24px; text-align:left; }
+        .single-rank-modal h3 { margin:0 0 5px; }
+        .single-rank-modal > p { margin:0 0 14px !important; font-size:13px !important; }
+        #single-ranking-status { margin:0 0 10px; color:#6e5aa6; font-size:13px; font-weight:800; }
+        #single-ranking-list { display:grid; gap:6px; min-height:50px; max-height:54vh; overflow:auto; padding:2px 5px 2px 0; }
+        .single-rank-row { display:grid; grid-template-columns:48px minmax(0,1fr) auto; align-items:center; gap:10px; padding:9px 11px; border:1px solid #eee9f4; border-radius:12px; background:#fff; color:#41384f; font-size:14px; }
+        .single-rank-row.is-me { border-color:#b9a8df; background:#f3effb; }
+        .single-rank-position { color:#82729d; font-weight:800; }
+        .single-rank-row:nth-child(1) .single-rank-position { color:#b57a13; }
+        .single-rank-row:nth-child(2) .single-rank-position { color:#68758b; }
+        .single-rank-row:nth-child(3) .single-rank-position { color:#ad684d; }
+        .single-rank-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:700; }
+        .single-rank-name-cell { display:grid; gap:3px; min-width:0; }
+        .single-rank-date { color:#8c829b; font-size:11px; font-weight:500; white-space:nowrap; }
+        .single-rank-score { color:#6c58ad; font-weight:900; }
+        .single-rank-close { width:100% !important; margin:12px 0 0 !important; color:#fff !important; background:#7360c7 !important; border:1px solid #7360c7 !important; box-shadow:0 6px 14px #7360c71f !important; font-weight:700; }
+        .single-rank-close:hover { color:#fff !important; background:#5d49b0 !important; border-color:#5d49b0 !important; }
+        #student-timer-display { box-sizing:border-box; width:min(100%,720px); margin:0 auto 16px; padding:12px 16px; border:1px solid #d9cfee; border-radius:14px; color:#604bb0; background:#f3effb; font-size:clamp(15px,3vw,20px); line-height:1.4; text-align:center; overflow-wrap:anywhere; }
+        @media (max-width:700px) {
+          html { width:100%; max-width:100%; overflow-x:clip; }`r`n        body:has(> .container) { width:100%; max-width:100%; box-sizing:border-box; overflow-x:clip; }
+          body:has(> .container) { padding:8px !important; }
+          body:has(> .container) > .container { width:100%; max-width:100%; min-width:0; box-sizing:border-box; padding:18px 12px 24px !important; }
+          body:has(> .container) > .container *, body:has(> .container) > .container *::before, body:has(> .container) > .container *::after { box-sizing:border-box; }
+          #game-board { width:100%; min-width:0; }
+          #game-board > h2 { margin:14px 0 10px; font-size:clamp(22px,6vw,32px); }
+          #game-board > .layout-container { display:grid; grid-template-columns:minmax(0,1fr); align-items:stretch; justify-content:stretch; width:100%; min-width:0; gap:12px !important; }
+          #game-board > .layout-container > .box-panel { width:100%; max-width:none; min-width:0 !important; padding:clamp(12px,4vw,18px) !important; }
+          #student-timer-display { width:100%; margin:0 auto 12px; padding:11px 12px; font-size:clamp(15px,4.3vw,19px); }
+          #card-grid { width:100%; min-width:0; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(7px,2.5vw,11px) !important; margin-top:10px; }
+          #card-grid .card { min-width:0; width:100%; border-width:3px; }
+          #card-grid .card-num { top:4px; left:5px; font-size:clamp(11px,3.5vw,14px); }
+          #card-grid .triangle { border-left-width:clamp(14px,6vw,25px); border-right-width:clamp(14px,6vw,25px); border-bottom-width:clamp(26px,11vw,45px); }
+          #student-controls { width:100%; gap:8px; margin-top:16px; }
+          #student-controls button { min-width:0; height:auto; min-height:54px; padding:9px 5px; font-size:clamp(18px,5vw,24px); }
+          #found-haps-list { min-height:70px !important; overflow-wrap:anywhere; }
+          #live-ranking { min-width:0; }
+          #game-board > div[style*="margin-top: 30px"] { margin-top:16px !important; }
+          #game-board > div[style*="margin-top: 30px"] .btn-restart { width:100% !important; max-width:320px; }
+        }
+        @media (max-width:380px) {
+          body:has(> .container) > .container { padding-inline:9px !important; }
+          #card-grid { gap:6px !important; }
+        }    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="game-topbar"><a class="game-brand" href="../classroom-games/"><span class="game-brand-mark">✦</span> 반짝넷 <small>다같이 게임</small></a><a class="game-back" href="../classroom-games/">게임 선택으로 ↗</a></div>
+    <div class="main-title-row">
+        <h1 id="main-title" onclick="location.href='../classroom-games/'" style="cursor:pointer; display: flex; justify-content: center; align-items: baseline; gap: 10px;" title="다같이 게임으로 가기">
+            반짝 ✨ 결! 합!
+        </h1>
+        <button type="button" class="qr-share-btn" onclick="showQrShare()" aria-haspopup="dialog" aria-controls="share-qr-modal">▦ QR 공유</button>
+    </div>
+    <div id="share-qr-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="share-qr-title" onclick="if(event.target === this) closeQrShare()">
+        <div class="modal-box qr-share-modal">
+            <button type="button" class="qr-share-close" onclick="closeQrShare()" aria-label="QR 공유 창 닫기">×</button>
+            <h3 id="share-qr-title">📱 QR 코드 공유</h3>
+            <p id="share-qr-description">QR 코드를 스캔하면 반짝결합에 접속할 수 있어요.</p>
+            <div id="share-qr-code" aria-label="반짝결합 공유 QR 코드"></div>
+            <div id="share-qr-url"></div>
+            <button type="button" class="qr-share-dismiss" onclick="closeQrShare()">닫기</button>
+        </div>
+    </div>
+    <button id="top-restart-btn" class="btn-restart" onclick="confirmRestart()">🔄 결! 합! 다시 시작하기</button>
+
+    <div id="main-screen">
+        <details class="guide-details">
+            <summary>📖 게임 방법 보기 (클릭)</summary>
+            <div class="guide-content">
+                <p><strong>🧠 '합'이란?</strong></p>
+                <p>화면에 깔린 9장의 카드 중, 3가지 속성(모양, 도형색, 배경색)이 <b>모두 같거나 모두 다른</b> 3장의 카드를 말합니다.</p>
+                <br>
+                <p><strong>🚩 동시 경쟁 방식 설명</strong></p>
+                <p>1. 모든 참가자는 동시에 9장의 카드를 보며 '합'을 찾습니다.</p>
+                <p>2. '합'을 찾았다면, <b>누구보다 빨리 하단의 [합! 외치기] 버튼을 누르세요.</b></p>
+                <p>3. 가장 먼저 누른 참가자에게만 제한 시간(타이머)이 주어지며, 카드를 선택할 권한이 생깁니다.</p>
+                <p>4. 시간 내에 정답 조합 3장을 고르면 +1점, 못 고르거나 오답이면 -1점을 얻습니다.</p>
+                <p>5. 더 이상 화면에 남은 '합'이 없다면 <b>[결!]</b> 버튼을 누르세요. (성공 시 +3점)</p>
+                <br>
+                <p>💡 <b>QR코드 사용이 어렵다면?</b><br>검색창에 <span class="hl">'반짝결합'</span>을 검색해서 바로 접속할 수 있어요!</p>
+            </div>
+        </details>
+        <button onclick="showTeacherSetup()" style="background:var(--secondary); width:80%; height:60px;">👨‍🏫 선생님 (방 만들기)</button><br>
+        <button onclick="startSingleGame()" class="single-mode-btn">🎮 싱글 모드 (혼자 3라운드 연습)</button><br>
+        <button onclick="showSingleRanking()" class="single-ranking-open">🏆 싱글 모드 주간 TOP 100</button><br>
+        <button onclick="showStudentLogin()" style="background:var(--primary); width:80%; height:60px; margin-top:15px; color:#222;">👦 학생 (참여하기)</button>
+    </div>
+
+    <div id="teacher-setup" class="hidden">
+        <h3>🛠️ 결! 합! 방 만들기</h3>
+        <div style="margin-bottom: 15px;">
+            <label style="display:block; margin-bottom:10px; color:var(--accent);">총 진행 라운드 수</label>
+            <select id="total-rounds" style="width: 80%;">
+                <option value="1">1 라운드 (초스피드)</option>
+                <option value="2">2 라운드</option>
+                <option value="3" selected="">3 라운드 (추천!)</option>
+                <option value="4">4 라운드</option>
+                <option value="5">5 라운드</option>
+                <option value="6">6 라운드</option>
+                <option value="7">7 라운드</option>
+                <option value="8">8 라운드</option>
+                <option value="9">9 라운드</option>
+                <option value="10">10 라운드 (정규 게임)</option>
+            </select>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label style="display:block; margin-bottom:10px; color:var(--accent);">제한 시간 (합! 외친 후)</label>
+            <select id="time-limit" style="width: 80%;">
+                <option value="10" selected="">10초 (원작 지니어스 룰! ⏰)</option>
+                <option value="20">20초</option>
+                <option value="30">30초</option>
+                <option value="0">시간 무제한</option>
+            </select>
+        </div>
+        <div style="margin-bottom: 25px;">
+            <label style="display:block; margin-bottom:10px; color:var(--accent);">오답 페널티 대기시간</label>
+            <select id="penalty-time" style="width: 80%;">
+                <option value="0" selected="">없음 (기본)</option>
+                <option value="3">3초</option>
+                <option value="5">5초</option>
+                <option value="10">10초</option>
+            </select>
+        </div>
+        <button onclick="createRoom()" style="background:var(--secondary); width:80%;">🚀 방 생성</button>
+    </div>
+
+    <div id="lobby-board" class="hidden layout-container">
+        <div class="box-panel" style="align-items: center; text-align: center;">
+            <h3 id="lobby-title" style="margin-top:0; font-size:24px;">📷 학생들을 초대하세요</h3>
+            <div id="qrcode"></div>
+            <h2 style="font-size:28px; margin-bottom: 5px;">방 코드: <span id="room-code-display" style="color:var(--primary);"></span></h2>
+            <p style="color:#ccc; font-size:15px; margin-top:0; margin-bottom: 15px;">QR 접속이 안 되면 검색창에 <b style="color:var(--accent);">반짝결합</b> 검색!</p>
+            
+            <button id="btn-start-game" onclick="startRound()" class="hidden" style="background:var(--success); color:#222; width:90%; font-size:20px; padding:15px; margin-top: auto;">▶️ 라운드 시작하기</button>
+            <p id="student-waiting-msg" class="hidden" style="color:var(--accent); font-size:18px; margin-top: auto;">선생님이 게임을 시작할 때까지<br>잠시만 기다려주세요.</p>
+        </div>
+        <div class="box-panel">
+            <h3 style="color:var(--primary); margin-top:0; text-align: center;">👋 접속자 명단 (<span id="player-count">0</span>명)</h3>
+            <div id="player-list" class="badge-container">대기 중...</div>
+        </div>
+    </div>
+
+    <div id="student-login" class="hidden">
+        <h3>게임 입장하기</h3>
+        
+        <details class="guide-details" style="margin-bottom: 20px;">
+            <summary>📖 동시 경쟁 방식 설명 (클릭)</summary>
+            <div class="guide-content">
+                <p>1. 모든 참가자는 동시에 9장의 카드를 봅니다.</p>
+                <p>2. '합'을 찾았다면, <b>누구보다 빨리 하단의 [합! 외치기] 버튼을 누르세요.</b></p>
+                <p>3. 가장 먼저 누른 참가자에게만 제한 시간(타이머)이 주어지며, 카드를 고를 권한이 생깁니다.</p>
+                <p>4. 정답을 맞추면 +1점, 시간 초과나 오답은 -1점입니다.</p>
+                <br>
+                <p>💡 <b>QR코드 사용이 어렵다면?</b><br>검색창에 <span class="hl">'반짝결합'</span>을 검색해서 바로 접속하세요!</p>
+            </div>
+        </details>
+
+        <input type="text" id="nickname" placeholder="닉네임 (예: 김지니어스)" maxlength="8">
+        <input type="text" id="room-code-input" placeholder="방 코드 4자리">
+        <button onclick="joinGame()" style="background:var(--primary); color:#222; width:80%; height:55px;">입장 완료!</button>
+    </div>
+
+    <div id="game-board" class="hidden">
+        <h2 style="color: var(--primary);"><span id="game-mode-label">Round</span> <span id="current-round-display">1</span> <span style="font-size: 16px; color:#888;">/ <span id="total-rounds-display">10</span></span></h2>
+        <div id="single-mode-note" class="hidden single-mode-note"><span>싱글 연습 중 · 완료하면 주간 랭킹에 기록돼요.</span><span id="single-elapsed-clock" class="single-elapsed-clock hidden" aria-label="싱글 플레이 경과 시간">⏱ <span id="single-elapsed-value">00:00</span></span><button onclick="showSingleRanking()">🏆 주간 TOP 100</button></div>
+        
+                <div id="student-timer-display" class="hidden">
+                    ⏱️ 남은 시간: <span id="hap-timer-sec">10</span>초
+                </div>
+        <div class="layout-container">
+            <div class="box-panel" style="background: rgba(0,0,0,0.3);">
+
+                
+                <div id="card-grid"></div>
+                
+                <div id="student-controls" class="hidden">
+                    <button id="btn-gyeol-shout" onclick="callGyeol()" style="background:var(--success); color:#222;">결!</button>
+                    <button id="btn-hap-shout" onclick="startHapSelection()" style="background:var(--danger);">합! 외치기</button>
+                </div>
+            </div>
+
+            <div class="box-panel" style="text-align: left;">
+                <h3 style="color:var(--accent); margin-top:0;">📜 찾아낸 합</h3>
+                <div id="found-haps-list" style="background:rgba(0,0,0,0.3); padding:15px; border-radius:10px; min-height:80px; margin-bottom:20px; color:#ccc; line-height: 1.8;">
+                    아직 찾은 합이 없습니다.
+                </div>
+
+                <div id="teacher-controls" class="hidden" style="margin-bottom: 25px;">
+                    <button onclick="showAnswers()" style="background:#8b5cf6; width:100%; margin:0; padding:12px; border-radius:10px; font-size:16px;">💡 교사용: 남은 정답(합) 보기</button>
+                </div>
+
+                <h3 id="live-ranking-title" style="color:var(--primary);">🏆 실시간 점수판</h3>
+                <div id="live-ranking" style="display:flex; flex-direction:column; gap:10px; overflow-y:auto; flex: 1;"></div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 30px; text-align: center;">
+            <button class="btn-restart" onclick="confirmRestart()" style="width: 250px;">🔄 게임 나가기 (다시 시작)</button>
+        </div>
+    </div>
+    
+    <div id="finish-board" class="hidden">
+        <h1 style="color:var(--accent); font-size: 50px; margin-bottom: 5px;">게임 종료!</h1>
+        <div id="winner-display" style="font-size: 40px; margin: 20px 0; color: #ffeb3b; text-shadow: 0 0 20px rgba(255,235,59,0.8); font-weight: bold; word-break: keep-all;"></div>
+        <div class="box-panel" style="margin: 20px auto; text-align: center;">
+            <h2 style="color:var(--primary);">🏆 최종 랭킹 🏆</h2>
+            <div id="final-ranking" style="font-size: 22px; line-height: 2;"></div>
+        </div>
+        <button id="single-ranking-open-final" class="single-ranking-open hidden" onclick="showSingleRanking()">🏆 싱글 모드 주간 TOP 100</button>
+        <button onclick="window.location.href=window.location.pathname;" style="background:var(--secondary); width: 80%;">처음으로 돌아가기</button>
+    </div>
+</div>
+
+<div id="banjjak-alert" class="modal-overlay hidden">
+    <div class="modal-box">
+        <h3>알림</h3>
+        <p id="alert-msg">메시지</p>
+        <button class="modal-btn" onclick="closeBanjjakAlert()" style="background:var(--secondary); width:100%;">확인</button>
+    </div>
+</div>
+
+<div id="banjjak-confirm" class="modal-overlay hidden">
+    <div class="modal-box">
+        <h3>알림</h3>
+        <p id="confirm-msg">메시지 내용</p>
+        <button class="modal-btn" id="confirm-yes" style="background:var(--secondary);">네!</button>
+        <button class="modal-btn cancel" onclick="closeBanjjakConfirm()">아니요</button>
+    </div>
+</div>
+
+<div id="single-nickname-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+        <h3>싱글 모드 시작</h3>
+        <p>주간 랭킹에 표시할 닉네임을 입력해 주세요. (최대 7글자)</p>
+        <form class="single-name-form" onsubmit="event.preventDefault(); beginSingleGame();">
+            <label for="single-nickname-input">닉네임</label>
+            <input id="single-nickname-input" type="text" maxlength="100" oninput="handleSingleNicknameInput(this)" autocomplete="nickname" placeholder="예: 반짝이1234">
+            <p id="single-nickname-error" aria-live="polite"></p>
+            <div class="single-name-actions">
+                <button type="button" class="btn-restart" onclick="closeSingleNickname()">취소</button>
+                <button type="submit">게임 시작</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="single-ranking-modal" class="modal-overlay hidden">
+    <div class="modal-box single-rank-modal" role="dialog" aria-modal="true" aria-labelledby="single-ranking-title">
+        <h3 id="single-ranking-title">🏆 결합 싱글 주간 TOP 100</h3>
+        <p>최근 7일 개인 최고 점수예요. 점수가 같으면 더 빠른 기록이 위에 올라가요.</p>
+        <div id="single-ranking-status" aria-live="polite">랭킹을 불러오는 중이에요.</div>
+        <div id="single-ranking-list"></div>
+        <button class="single-rank-close" onclick="closeSingleRanking()">닫기</button>
+    </div>
+</div>
+
+<script>
+    let currentRoomId = null;
+    let myNickname = null;
+    let myRole = null; 
+    let isSingleMode = false;
+    let singleRound = 0;
+    let singleTotalRounds = 3;
+    let singleScore = 0;
+    let isSavingSingleExit = false;
+    let singleRoundComplete = false;
+    let singleStartedAt = null;
+    let singleElapsedMs = 0;
+    let singleClockInterval = null;
+    let alertOnClose = null;
+    let statePollingInterval = null;
+    let selectedCards = []; 
+    let roomTimeLimit = 0;
+    let roomPenaltyTime = 0; // ✨ 페널티 시간 변수 추가
+    let hapTimerInterval = null;
+    let isSelectingHap = false; 
+    let renderedCardsJSON = ""; 
+    
+    // ✨ 페널티 관련 상태 변수
+    let isPenaltyActive = false;
+    let penaltyInterval = null;
+
+    let currentBoardCards = [];
+    let currentFoundHaps = [];
+    let singleRankPlayerKey = null;
+    let singleBestRank = null;
+
+    const SHAPES = ['circle', 'triangle', 'square'];
+    const S_COLORS = ['#ff7675', '#74b9ff', '#ffeaa7']; 
+    const B_COLORS = ['#ffffff', '#a4b0be', '#2f3542']; 
+
+    function playSound(type) {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        if (type === 'success') {
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(523.25, audioCtx.currentTime); 
+            oscillator.frequency.exponentialRampToValueAtTime(1046.50, audioCtx.currentTime + 0.5); 
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+        }
+
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.5);
+    }
+
+    function shootConfetti() {
+        var duration = 3000;
+        var end = Date.now() + duration;
+
+        (function frame() {
+            confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ffeb3b', '#f44336', '#4CAF50', '#2196F3'] });
+            confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#ffeb3b', '#f44336', '#4CAF50', '#2196F3'] });
+            if (Date.now() < end) requestAnimationFrame(frame);
+        }());
+    }
+
+    function hideAll() {
+        ['main-screen', 'teacher-setup', 'lobby-board', 'student-login', 'game-board', 'finish-board', 'single-nickname-modal', 'single-ranking-modal', 'single-ranking-open-final'].forEach(id => document.getElementById(id).classList.add('hidden'));
+        const singleNote = document.getElementById('single-mode-note');
+        if (singleNote) singleNote.classList.add('hidden');
+    }
+
+    function showQrShare() {
+        const modal = document.getElementById('share-qr-modal');
+        const qr = document.getElementById('share-qr-code');
+        const urlText = document.getElementById('share-qr-url');
+        const description = document.getElementById('share-qr-description');
+        const params = new URLSearchParams(window.location.search);
+        const roomCode = currentRoomId || params.get('room') || '';
+        const shareUrl = new URL(window.location.href);
+        shareUrl.search = '';
+        shareUrl.hash = '';
+        if (roomCode) shareUrl.searchParams.set('room', roomCode);
+        qr.innerHTML = '';
+        if (typeof QRCode === 'function') {
+            new QRCode(qr, { text: shareUrl.toString(), width: 280, height: 280, correctLevel: QRCode.CorrectLevel.M });
+        } else {
+            qr.textContent = 'QR 코드를 불러오지 못했어요. 페이지를 새로고침해 주세요.';
+        }
+        urlText.textContent = shareUrl.toString();
+        description.textContent = roomCode ? `QR 코드를 스캔하면 ${roomCode}번 방으로 바로 입장할 수 있어요.` : 'QR 코드를 스캔하면 반짝결합에 접속할 수 있어요.';
+        modal.classList.remove('hidden');
+        const closeButton = modal.querySelector('.qr-share-close');
+        if (closeButton) closeButton.focus();
+    }
+
+    function closeQrShare() {
+        const modal = document.getElementById('share-qr-modal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    document.addEventListener('keydown', event => {
+        const modal = document.getElementById('share-qr-modal');
+        if (event.key === 'Escape' && modal && !modal.classList.contains('hidden')) closeQrShare();
+    });
+    
+    function showTeacherSetup() { hideAll(); document.getElementById('teacher-setup').classList.remove('hidden'); }
+    
+    function showStudentLogin() { 
+        hideAll(); 
+        document.getElementById('student-login').classList.remove('hidden'); 
+        
+        const title = document.getElementById('main-title');
+        if(title) { title.onclick = null; title.removeAttribute('title'); title.style.pointerEvents = 'none'; }
+        
+        const restartBtn = document.getElementById('top-restart-btn');
+        if(restartBtn) restartBtn.classList.add('hidden');
+
+        const savedNickname = localStorage.getItem('banjjak_combination_nickname');
+        if (savedNickname) {
+            document.getElementById('nickname').value = savedNickname;
+        }
+    }
+    
+    function showBanjjakAlert(msg, onClose = null) { alertOnClose = onClose; document.getElementById('alert-msg').innerHTML = msg; document.getElementById('banjjak-alert').classList.remove('hidden'); }
+    function closeBanjjakAlert() {
+        document.getElementById('banjjak-alert').classList.add('hidden');
+        const callback = alertOnClose; alertOnClose = null; callback?.();
+    }
+
+    function showBanjjakConfirm(msg, onConfirm) {
+        document.getElementById('confirm-msg').innerHTML = msg;
+        document.getElementById('banjjak-confirm').classList.remove('hidden');
+        document.getElementById('confirm-yes').onclick = () => { closeBanjjakConfirm(); onConfirm(); };
+    }
+    function closeBanjjakConfirm() { document.getElementById('banjjak-confirm').classList.add('hidden'); }
+
+    function confirmRestart() {
+        if (isSavingSingleExit) return;
+        const exitingSingle = isSingleMode;
+        const message = exitingSingle
+            ? "싱글 연습을 그만두고 처음으로 돌아갈까요?<br><span style='font-size:14px; color:#6c58ad;'>(현재 점수를 주간 랭킹에 저장합니다)</span>"
+            : "정말 방을 나가고 다시 시작하시겠습니까?<br><span style='font-size:14px; color:#aaa;'>(진행 중인 내용은 모두 사라집니다)</span>";
+        showBanjjakConfirm(message, () => {
+            if (exitingSingle) {
+                saveAndLeaveSingleGame();
+            } else {
+                window.location.href = window.location.pathname;
+            }
+        });
+    }
+
+    async function saveAndLeaveSingleGame() {
+        if (isSavingSingleExit) return;
+        isSavingSingleExit = true;
+        singleElapsedMs = readSingleElapsedMs();
+        stopSingleClock();
+        const gameBoard = document.getElementById('game-board');
+        const previousPointerEvents = gameBoard.style.pointerEvents;
+        gameBoard.style.pointerEvents = 'none';
+        try {
+            await saveSingleRank();
+            window.location.href = window.location.pathname;
+        } catch (error) {
+            isSavingSingleExit = false;
+            gameBoard.style.pointerEvents = previousPointerEvents;
+            showBanjjakAlert('점수를 주간 랭킹에 저장하지 못했어요. 연결을 확인한 뒤 다시 나가기를 눌러 주세요.');
+        }
+    }
+
+    function showAnswers() {
+        if (myRole !== 'HOST') return;
+        if (!currentBoardCards || currentBoardCards.length !== 9) return;
+
+        const check = (p1, p2, p3) => (p1 === p2 && p2 === p3) || (p1 !== p2 && p2 !== p3 && p1 !== p3);
+        const isHap = (c1, c2, c3) => check(c1.s, c2.s, c3.s) && check(c1.c, c2.c, c3.c) && check(c1.b, c2.b, c3.b);
+
+        let allHaps = [];
+        for(let i=0; i<9; i++) {
+            for(let j=i+1; j<9; j++) {
+                for(let k=j+1; k<9; k++) {
+                    if(isHap(currentBoardCards[i], currentBoardCards[j], currentBoardCards[k])) {
+                        let hapKey = `${i},${j},${k}`;
+                        if (!currentFoundHaps.includes(hapKey)) {
+                            allHaps.push(`[ ${i+1}, ${j+1}, ${k+1} ]`);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (allHaps.length === 0) {
+            showBanjjakAlert("현재 판에 남은 정답(합)이 없습니다!<br><br><b style='color:var(--danger);'>'결!'</b>을 외치라고 하세요!");
+        } else {
+            let msg = "<h3 style='color:var(--accent); margin-top:0;'>💡 남은 정답 목록</h3>";
+            msg += "<p style='font-size:16px; color:#ccc; margin-bottom:15px; word-break: keep-all;'>아직 학생들이 찾지 못한 합입니다. 힌트를 줘보세요!</p>";
+            msg += allHaps.map(h => `<span style='background:rgba(255,255,255,0.2); padding:6px 12px; border-radius:8px; margin:4px; display:inline-block; font-size:18px; font-weight:bold; letter-spacing:1px;'>${h}</span>`).join('');
+            showBanjjakAlert(msg);
+        }
+    }
+
+    // ✨ 페널티 로직 추가
+    function applyPenalty() {
+        if (roomPenaltyTime <= 0) return; // 대기시간 없으면 패스
+        
+        isPenaltyActive = true;
+        const btnHap = document.getElementById('btn-hap-shout');
+        const btnGyeol = document.getElementById('btn-gyeol-shout');
+        
+        let timeLeft = roomPenaltyTime;
+        if(btnHap) {
+            btnHap.disabled = true;
+            btnHap.style.background = "#555";
+            btnHap.innerText = `페널티 (${timeLeft}초)`;
+        }
+        if(btnGyeol) btnGyeol.disabled = true;
+
+        if(penaltyInterval) clearInterval(penaltyInterval);
+        penaltyInterval = setInterval(() => {
+            timeLeft--;
+            if(timeLeft <= 0) {
+                clearPenalty();
+            } else {
+                if(btnHap) btnHap.innerText = `페널티 (${timeLeft}초)`;
+            }
+        }, 1000);
+    }
+
+    function clearPenalty() {
+        isPenaltyActive = false;
+        if(penaltyInterval) clearInterval(penaltyInterval);
+        const btnHap = document.getElementById('btn-hap-shout');
+        const btnGyeol = document.getElementById('btn-gyeol-shout');
+        
+        // 현재 선택 상태가 아니면 버튼 활성화
+        if(!isSelectingHap && btnHap) {
+            btnHap.disabled = false;
+            btnHap.innerText = "합! 외치기";
+            btnHap.style.background = "var(--danger)";
+        }
+        if(btnGyeol) btnGyeol.disabled = false;
+    }
+
+    function makeSingleBoard() {
+        const deck = [];
+        for (let s = 0; s < 3; s++) for (let c = 0; c < 3; c++) for (let b = 0; b < 3; b++) deck.push({ s, c, b });
+        for (let i = deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+        return deck.slice(0, 9);
+    }
+
+    function isHap(cards, indices) {
+        const [a, b, c] = indices.map(index => cards[index]);
+        if (!a || !b || !c) return false;
+        return ['s', 'c', 'b'].every(key => (a[key] === b[key] && b[key] === c[key]) || (a[key] !== b[key] && a[key] !== c[key] && b[key] !== c[key]));
+    }
+
+    function possibleHapKeys(cards) {
+        const keys = [];
+        for (let i = 0; i < cards.length; i++) for (let j = i + 1; j < cards.length; j++) for (let k = j + 1; k < cards.length; k++) {
+            if (isHap(cards, [i, j, k])) keys.push(`${i},${j},${k}`);
+        }
+        return keys;
+    }
+
+    function updateSingleScoreboard() {
+        const rankBox = document.getElementById('live-ranking');
+        document.getElementById('live-ranking-title').textContent = '👤 내 점수';
+        const rankRow = document.createElement('div');
+        rankRow.style.cssText = 'display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.1);padding:8px 0;font-size:18px';
+        const name = document.createElement('span');
+        name.style.color = '#FFD700';
+        name.textContent = `1. ${myNickname || '나'}`;
+        const score = document.createElement('strong');
+        score.style.color = 'var(--accent)';
+        score.textContent = `${singleScore}점`;
+        rankRow.append(name, score);
+        rankBox.replaceChildren(rankRow);
+        const hapsBox = document.getElementById('found-haps-list');
+        hapsBox.innerHTML = currentFoundHaps.length
+            ? currentFoundHaps.map(key => `<span style="background:rgba(255,255,255,.2);padding:5px 10px;border-radius:8px;margin:4px;display:inline-block;font-size:18px">[ ${key.split(',').map(n => Number(n) + 1).join(', ')} ]</span>`).join('')
+            : '아직 찾은 합이 없습니다.';
+    }
+
+    function formatSingleDuration(durationMs) {
+        const totalSeconds = Math.max(0, Math.floor((Number(durationMs) || 0) / 1000));
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        return hours > 0
+            ? `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+            : `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function readSingleElapsedMs() {
+        if (singleStartedAt === null) return singleElapsedMs;
+        const now = window.performance?.now ? performance.now() : Date.now();
+        return Math.max(0, Math.round(now - singleStartedAt));
+    }
+
+    function updateSingleClock() {
+        const elapsed = readSingleElapsedMs();
+        const value = document.getElementById('single-elapsed-value');
+        if (value) value.textContent = formatSingleDuration(elapsed);
+    }
+
+    function startSingleClock() {
+        if (singleClockInterval) clearInterval(singleClockInterval);
+        singleStartedAt = window.performance?.now ? performance.now() : Date.now();
+        singleElapsedMs = 0;
+        document.getElementById('single-elapsed-clock').classList.remove('hidden');
+        updateSingleClock();
+        singleClockInterval = setInterval(updateSingleClock, 1000);
+    }
+
+    function stopSingleClock() {
+        if (singleStartedAt) singleElapsedMs = readSingleElapsedMs();
+        singleStartedAt = null;
+        if (singleClockInterval) clearInterval(singleClockInterval);
+        singleClockInterval = null;
+        updateSingleClock();
+    }
+
+    function normalizeSingleNickname(value) {
+        const cleaned = String(value || '').normalize('NFC').trim().replace(/\s+/gu, ' ');
+        if (window.Intl && typeof Intl.Segmenter === 'function') {
+            return Array.from(new Intl.Segmenter('ko', { granularity: 'grapheme' }).segment(cleaned), part => part.segment).slice(0, 7).join('');
+        }
+        return Array.from(cleaned).slice(0, 7).join('');
+    }
+
+    function handleSingleNicknameInput(input) {
+        input.value = normalizeSingleNickname(input.value);
+        if (input.value) localStorage.setItem('banjjak_combination_nickname', input.value);
+        else localStorage.removeItem('banjjak_combination_nickname');
+    }
+
+    function makeDefaultSingleNickname() {
+        const suffix = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+        return `반짝이${suffix}`;
+    }
+
+    function getSingleRankPlayerKey() {
+        if (singleRankPlayerKey) return singleRankPlayerKey;
+        let key = localStorage.getItem('banjjak_combination_single_player_key') || '';
+        if (!/^[a-f0-9-]{32,64}$/i.test(key)) {
+            if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+                key = window.crypto.randomUUID().replace(/-/g, '');
+            } else if (window.crypto && typeof window.crypto.getRandomValues === 'function') {
+                key = Array.from(window.crypto.getRandomValues(new Uint8Array(32)), byte => byte.toString(16).padStart(2, '0')).join('');
+            } else {
+                key = `${Date.now().toString(16)}${Math.random().toString(16).slice(2)}${Math.random().toString(16).slice(2)}`;
+            }
+            localStorage.setItem('banjjak_combination_single_player_key', key);
+        }
+        singleRankPlayerKey = key;
+        return key;
+    }
+
+    function closeSingleNickname() {
+        document.getElementById('single-nickname-modal').classList.add('hidden');
+    }
+
+    function showSingleRanking() {
+        document.getElementById('single-ranking-modal').classList.remove('hidden');
+        loadSingleRanking();
+    }
+
+    function closeSingleRanking() {
+        document.getElementById('single-ranking-modal').classList.add('hidden');
+    }
+
+    async function loadSingleRanking() {
+        const status = document.getElementById('single-ranking-status');
+        const list = document.getElementById('single-ranking-list');
+        status.textContent = '랭킹을 불러오는 중이에요.';
+        list.replaceChildren();
+        try {
+            const response = await fetch(`api_combination_single_rank.php?action=leaderboard&player_key=${encodeURIComponent(getSingleRankPlayerKey())}&t=${Date.now()}`, { cache: 'no-store' });
+            const result = await response.json();
+            if (!response.ok || !result.ok) throw new Error(result.message || '랭킹을 불러오지 못했습니다.');
+
+            singleBestRank = Number.isInteger(result.my_rank) ? result.my_rank : null;
+            status.textContent = singleBestRank ? `내 최고 기록 ${singleBestRank}위 · 최근 7일` : '최근 7일 개인 최고 기록 TOP 100';
+            if (!result.rows || result.rows.length === 0) {
+                status.textContent = '아직 기록이 없어요. 첫 싱글 기록을 남겨 보세요!';
+                const empty = document.createElement('div');
+                empty.className = 'single-rank-row';
+                empty.textContent = '아직 랭킹 기록이 없어요.';
+                list.appendChild(empty);
+                return;
+            }
+
+            result.rows.forEach(rowData => {
+                const row = document.createElement('div');
+                row.className = `single-rank-row${rowData.is_me ? ' is-me' : ''}`;
+                const position = document.createElement('span');
+                position.className = 'single-rank-position';
+                position.textContent = `${rowData.rank}위`;
+                const nameCell = document.createElement('div');
+                nameCell.className = 'single-rank-name-cell';
+                const name = document.createElement('span');
+                name.className = 'single-rank-name';
+                name.textContent = rowData.nickname;
+                const registeredAt = document.createElement('time');
+                registeredAt.className = 'single-rank-date';
+                const duration = Number.isInteger(rowData.duration_ms)
+                    ? ` · ⏱ ${formatSingleDuration(rowData.duration_ms)}`
+                    : ' · 시간 미기록';
+                registeredAt.textContent = `등록일 ${rowData.registered_at || '-'}${duration}`;
+                const score = document.createElement('strong');
+                score.className = 'single-rank-score';
+                score.textContent = `${rowData.score}점`;
+                nameCell.append(name, registeredAt);
+                row.append(position, nameCell, score);
+                list.appendChild(row);
+            });
+        } catch (error) {
+            status.textContent = '랭킹을 불러오지 못했어요. 잠시 후 다시 눌러 주세요.';
+        }
+    }
+
+    async function saveSingleRank() {
+        const response = await fetch('api_combination_single_rank.php?action=save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            cache: 'no-store',
+            body: JSON.stringify({ player_key: getSingleRankPlayerKey(), nickname: myNickname, score: singleScore, duration_ms: isSingleMode ? readSingleElapsedMs() : singleElapsedMs })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.ok) throw new Error(result.message || '기록을 저장하지 못했습니다.');
+        singleBestRank = Number.isInteger(result.my_rank) ? result.my_rank : null;
+        return result;
+    }
+
+    function startSingleRound() {
+        singleRoundComplete = false;
+        currentBoardCards = makeSingleBoard();
+        currentFoundHaps = [];
+        renderedCardsJSON = '';
+        isSelectingHap = false;
+        isPenaltyActive = false;
+        clearPenalty();
+        document.getElementById('game-mode-label').innerText = '싱글 연습';
+        document.getElementById('current-round-display').innerText = singleRound;
+        document.getElementById('total-rounds-display').innerText = singleTotalRounds;
+        document.getElementById('student-controls').classList.remove('hidden');
+        document.getElementById('teacher-controls').classList.add('hidden');
+        document.getElementById('student-timer-display').classList.add('hidden');
+        updateSingleScoreboard();
+        renderBoard(currentBoardCards);
+    }
+
+    function startSingleGame() {
+        const input = document.getElementById('single-nickname-input');
+        const savedNickname = normalizeSingleNickname(localStorage.getItem('banjjak_combination_nickname') || '');
+        input.value = savedNickname || makeDefaultSingleNickname();
+        localStorage.setItem('banjjak_combination_nickname', input.value);
+        document.getElementById('single-nickname-error').textContent = '';
+        document.getElementById('single-nickname-modal').classList.remove('hidden');
+        setTimeout(() => input.focus(), 0);
+    }
+
+    function beginSingleGame() {
+        const input = document.getElementById('single-nickname-input');
+        const nickname = normalizeSingleNickname(input.value);
+        if (!nickname || /[\u0000-\u001f\u007f]/u.test(nickname)) {
+            document.getElementById('single-nickname-error').textContent = '닉네임을 1~7글자로 입력해 주세요.';
+            input.focus();
+            return;
+        }
+        myNickname = nickname;
+        localStorage.setItem('banjjak_combination_nickname', nickname);
+        getSingleRankPlayerKey();
+        closeSingleNickname();
+        isSingleMode = true;
+        myRole = 'PLAYER';
+        currentRoomId = null;
+        singleRound = 1;
+        singleScore = 0;
+        roomTimeLimit = 0;
+        roomPenaltyTime = 0;
+        if (statePollingInterval) clearInterval(statePollingInterval);
+        if (hapTimerInterval) clearInterval(hapTimerInterval);
+        hideAll();
+        document.getElementById('game-board').classList.remove('hidden');
+        document.getElementById('single-mode-note').classList.remove('hidden');
+        startSingleClock();
+        startSingleRound();
+    }
+
+    async function finishSingleGame() {
+        singleElapsedMs = readSingleElapsedMs();
+        stopSingleClock();
+        isSingleMode = false;
+        if (statePollingInterval) clearInterval(statePollingInterval);
+        if (hapTimerInterval) clearInterval(hapTimerInterval);
+        hideAll();
+        document.getElementById('single-mode-note').classList.add('hidden');
+        document.getElementById('finish-board').classList.remove('hidden');
+        document.getElementById('winner-display').textContent = `🎉 ${myNickname}의 싱글 연습 완료! (${singleScore}점)`;
+        const finalRank = document.getElementById('final-ranking');
+        finalRank.innerHTML = `<div style="color:#6c58ad"><b>최종 점수</b> · ${singleScore}점</div><p style="font-size:15px;line-height:1.6">완료 시간 ⏱ ${formatSingleDuration(singleElapsedMs)}<br>${singleTotalRounds}라운드 연습을 마쳤어요.<br>주간 랭킹에 기록을 저장하고 있어요.</p>`;
+        document.getElementById('single-ranking-open-final').classList.remove('hidden');
+        shootConfetti();
+        playSound('success');
+        try {
+            const result = await saveSingleRank();
+            const rankText = result.my_rank ? `${result.my_rank}위` : 'TOP 100 밖';
+            finalRank.innerHTML = `<div style="color:#6c58ad"><b>최종 점수</b> · ${singleScore}점</div><p style="font-size:15px;line-height:1.6">완료 시간 ⏱ ${formatSingleDuration(singleElapsedMs)}<br>주간 개인 최고점 <b>${result.best_score}점</b> · 현재 <b>${rankText}</b><br>${result.is_new_best ? '새 최고 기록을 등록했어요!' : '이번 주 최고 기록을 유지했어요.'}</p>`;
+        } catch (error) {
+            finalRank.innerHTML = `<div style="color:#6c58ad"><b>최종 점수</b> · ${singleScore}점</div><p style="font-size:15px;line-height:1.6">${singleTotalRounds}라운드 연습을 마쳤어요.<br>랭킹 서버에 연결하지 못해 기록을 저장하지 못했어요.</p>`;
+        }
+    }
+
+    function finishSingleRound() {
+        if (!isSingleMode || singleRoundComplete) return;
+        singleRoundComplete = true;
+        singleScore += 3;
+        updateSingleScoreboard();
+        shootConfetti();
+        playSound('success');
+        if (singleRound >= singleTotalRounds) {
+            showBanjjakAlert(`결! 성공! +3점<br><br>싱글 연습이 끝났어요. 최종 점수: <b>${singleScore}점</b>`, finishSingleGame);
+        } else {
+            showBanjjakAlert(`결! 성공! +3점<br><br>다음 라운드로 넘어가요.`, () => { singleRound++; startSingleRound(); });
+        }
+    }
+
+    async function createRoom() {
+        isSingleMode = false;
+        const rounds = document.getElementById('total-rounds').value;
+        const timeLimit = document.getElementById('time-limit').value;
+        const penaltyTime = document.getElementById('penalty-time').value; // ✨ 페널티 시간 가져오기
+        const generatedCode = Math.floor(1000 + Math.random() * 9000).toString();
+
+        const res = await fetch('api_combination_create_room.php', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ room_code: generatedCode, total_rounds: parseInt(rounds), time_limit: parseInt(timeLimit), penalty_time: parseInt(penaltyTime) }) // ✨ 전송 데이터에 추가
+        }).then(r => r.json());
+
+        if(res.status === 'success') {
+            myRole = 'HOST'; currentRoomId = generatedCode;
+            hideAll();
+            document.getElementById('lobby-board').classList.remove('hidden');
+            document.getElementById('room-code-display').innerText = currentRoomId;
+            document.getElementById('btn-start-game').classList.remove('hidden');
+            
+            document.getElementById("qrcode").innerHTML = "";
+            new QRCode(document.getElementById("qrcode"), { text: window.location.href.split('?')[0] + "?room=" + currentRoomId, width: 350, height: 350 });
+            
+            statePollingInterval = setInterval(fetchGameState, 1500);
+        } else { showBanjjakAlert(res.message); }
+    }
+
+    async function joinGame() {
+        isSingleMode = false;
+        const name = document.getElementById('nickname').value;
+        const code = document.getElementById('room-code-input').value;
+        if (!name || !code) return showBanjjakAlert("입력칸을 채워주세요!");
+
+        localStorage.setItem('banjjak_combination_nickname', name);
+
+        const res = await fetch('api_combination_join_room.php', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ room_code: code, player_name: name })
+        }).then(r => r.json());
+
+        if(res.status === 'success') {
+            myRole = 'PLAYER'; myNickname = name; currentRoomId = code;
+            hideAll();
+            document.getElementById('lobby-board').classList.remove('hidden');
+            document.getElementById('lobby-title').innerText = "입장 완료!";
+            document.getElementById('room-code-display').innerText = currentRoomId;
+            document.getElementById('student-waiting-msg').classList.remove('hidden');
+            
+            statePollingInterval = setInterval(fetchGameState, 1500);
+        } else { showBanjjakAlert(res.message); }
+    }
+
+    async function startRound() {
+        const res = await fetch('api_combination_start_round.php', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ room_code: currentRoomId })
+        }).then(r => r.json());
+
+        if(res.status !== 'success') showBanjjakAlert("오류: " + res.message);
+    }
+
+    async function fetchGameState() {
+        if(!currentRoomId) return;
+        try {
+            const res = await fetch(`api_combination_get_state.php?room_code=${currentRoomId}&t=${new Date().getTime()}`).then(r => r.json());
+            if(res.status !== 'success') return;
+
+            roomTimeLimit = parseInt(res.time_limit) || 0;
+            roomPenaltyTime = parseInt(res.penalty_time) || 0; // ✨ 서버에서 페널티 시간 세팅
+
+            const list = document.getElementById('player-list');
+            const rankBox = document.getElementById('live-ranking');
+            if(list) list.innerHTML = ""; 
+            if(rankBox) rankBox.innerHTML = "";
+            
+            document.getElementById('player-count').innerText = res.players.length;
+            
+            res.players.forEach((p, idx) => { 
+                const isMe = p.player_name === myNickname ? "border: 2px solid var(--accent);" : "";
+                if(list) list.innerHTML += `<div class="player-badge" style="${isMe}">${p.player_name} <span class="player-score">${p.score}점</span></div>`;
+                
+                let rankColor = "#fff";
+                if(idx === 0) rankColor = "#FFD700"; else if(idx === 1) rankColor = "#C0C0C0"; else if(idx === 2) rankColor = "#cd7f32";
+                
+                if(rankBox) rankBox.innerHTML += `<div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.1); padding:8px 0; font-size: 18px;">
+                    <span style="color:${rankColor};"><b>${idx+1}.</b> ${p.player_name}</span>
+                    <strong style="color:var(--accent);">${p.score}pt</strong>
+                </div>`;
+            });
+
+            if(res.room_status === 'PLAYING') {
+                if(document.getElementById('game-board').classList.contains('hidden')) {
+                    hideAll();
+                    document.getElementById('game-board').classList.remove('hidden');
+                    if(myRole === 'PLAYER') document.getElementById('student-controls').classList.remove('hidden');
+                }
+                
+                document.getElementById('current-round-display').innerText = res.current_round;
+                document.getElementById('total-rounds-display').innerText = res.total_rounds;
+                
+                currentBoardCards = res.board_cards || [];
+                currentFoundHaps = res.found_haps || [];
+
+                const hapsBox = document.getElementById('found-haps-list');
+                if(res.found_haps.length > 0) {
+                    hapsBox.innerHTML = res.found_haps.map(h => {
+                        let nums = h.split(',').map(n => Number(n)+1).join(', ');
+                        return `<span style="background:rgba(255,255,255,0.2); padding:5px 10px; border-radius:8px; margin:4px; display:inline-block; font-size: 18px;">[ ${nums} ]</span>`;
+                    }).join('');
+                } else {
+                    hapsBox.innerHTML = "아직 찾은 합이 없습니다.";
+                }
+
+                if(myRole === 'HOST') {
+                    document.getElementById('teacher-controls').classList.remove('hidden');
+                }
+
+                renderBoard(res.board_cards);
+            } 
+            else if(res.room_status === 'WAITING' && res.current_round > 1) {
+                if (isSelectingHap) resetHapUI();
+                clearPenalty(); // ✨ 대기 상태로 가면 페널티 초기화
+                
+                document.getElementById('teacher-controls').classList.add('hidden');
+
+                if(document.getElementById('lobby-board').classList.contains('hidden')) {
+                    hideAll();
+                    document.getElementById('lobby-board').classList.remove('hidden');
+                    document.getElementById('qrcode').classList.add('hidden'); 
+                    document.getElementById('lobby-title').innerText = `Round ${res.current_round} 대기 중...`;
+                }
+            }
+            else if(res.room_status === 'FINISHED') {
+                if (isSelectingHap) resetHapUI();
+                clearPenalty(); // ✨ 게임 종료 시 페널티 초기화
+                
+                document.getElementById('teacher-controls').classList.add('hidden');
+
+                if(document.getElementById('finish-board').classList.contains('hidden')) {
+                    hideAll();
+                    document.getElementById('finish-board').classList.remove('hidden');
+                    clearInterval(statePollingInterval);
+                    
+                    const finalRank = document.getElementById('final-ranking');
+                    finalRank.innerHTML = ""; 
+                    
+                    if (res.players && res.players.length > 0) {
+                        const maxScore = Math.max(...res.players.map(p => p.score));
+                        const winners = res.players.filter(p => p.score === maxScore).map(p => p.player_name);
+                        
+                        document.getElementById('winner-display').innerHTML = `👑 우승: ${winners.join(', ')} (${maxScore}점) 👑`;
+                        shootConfetti(); 
+                        playSound('success');
+
+                        let currentRank = 1;
+                        res.players.forEach((p, idx) => {
+                            if (idx > 0 && p.score < res.players[idx - 1].score) {
+                                currentRank = idx + 1;
+                            }
+                            
+                            let medal = '';
+                            if (currentRank === 1) medal = '🥇';
+                            else if (currentRank === 2) medal = '🥈';
+                            else if (currentRank === 3) medal = '🥉';
+
+                            finalRank.innerHTML += `<div style="border-bottom: 1px solid rgba(255,255,255,0.1); padding: 5px;">
+                                <span style="color: ${currentRank === 1 ? '#FFD700' : '#fff'}">
+                                    <b>${currentRank}위</b> ${medal} ${p.player_name} - ${p.score}점
+                                </span>
+                            </div>`;
+                        });
+                    } else {
+                        document.getElementById('winner-display').innerHTML = "참가자가 없습니다.";
+                    }
+                }
+            }
+        } catch(e) {}
+    }
+
+    function renderBoard(cardsArray) {
+        const newCardsJSON = JSON.stringify(cardsArray);
+        if(renderedCardsJSON === newCardsJSON) return; 
+        
+        const grid = document.getElementById('card-grid');
+        grid.innerHTML = "";
+        selectedCards = [];
+        renderedCardsJSON = newCardsJSON; 
+
+        cardsArray.forEach((card, i) => {
+            const el = document.createElement('div');
+            el.className = 'card';
+            el.style.backgroundColor = B_COLORS[card.b];
+            
+            if(myRole === 'PLAYER') el.onclick = () => toggleSelect(i, el);
+
+            const num = document.createElement('span');
+            num.className = 'card-num'; num.innerText = i + 1;
+            
+            const shape = document.createElement('div');
+            if (SHAPES[card.s] === 'triangle') {
+                shape.className = 'triangle'; shape.style.borderBottomColor = S_COLORS[card.c];
+            } else {
+                shape.className = `shape ${SHAPES[card.s]}`; shape.style.backgroundColor = S_COLORS[card.c];
+            }
+
+            el.appendChild(num); el.appendChild(shape); grid.appendChild(el);
+        });
+    }
+
+    function startHapSelection() {
+        if (isSelectingHap || isPenaltyActive) return; // ✨ 페널티 중이면 무시
+        
+        isSelectingHap = true;
+        selectedCards = [];
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+        
+        const btnHap = document.getElementById('btn-hap-shout');
+        btnHap.disabled = true;
+        btnHap.classList.add('selecting'); 
+        btnHap.innerText = "3장 고르는 중...";
+        btnHap.style.background = "#555";
+        
+        const timerDisplay = document.getElementById('student-timer-display');
+        timerDisplay.classList.remove('hidden');
+
+        if (roomTimeLimit > 0) {
+            let timeLeft = roomTimeLimit;
+            document.getElementById('hap-timer-sec').innerText = timeLeft;
+            timerDisplay.innerHTML = `⏱️ 남은 시간: <span id="hap-timer-sec">${timeLeft}</span>초`;
+            
+            hapTimerInterval = setInterval(() => {
+                timeLeft--;
+                const secEl = document.getElementById('hap-timer-sec');
+                if(secEl) secEl.innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(hapTimerInterval);
+                    handleHapTimeout();
+                }
+            }, 1000);
+        } else {
+            timerDisplay.innerHTML = "시간 무제한! 3장을 고르세요.";
+        }
+    }
+
+    async function handleHapTimeout() {
+        resetHapUI();
+        const res = await fetch('api_combination_call_hap.php', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ room_code: currentRoomId, player_name: myNickname, is_timeout: true })
+        }).then(r => r.json());
+        
+        applyPenalty(); // ✨ 타임아웃도 오답이므로 페널티 적용
+        showBanjjakAlert(res.message);
+    }
+
+    function toggleSelect(idx, el) {
+        if (!isSelectingHap) {
+            showBanjjakAlert("먼저 하단의 [합! 외치기] 버튼을 누른 후 카드를 고르세요!");
+            return;
+        }
+
+        const pos = selectedCards.indexOf(idx);
+        if (pos > -1) {
+            selectedCards.splice(pos, 1); el.classList.remove('selected');
+        } else if (selectedCards.length < 3) {
+            selectedCards.push(idx); el.classList.add('selected');
+        }
+
+        if (selectedCards.length === 3) {
+            submitHap();
+        }
+    }
+
+    async function submitHap() {
+        if(hapTimerInterval) clearInterval(hapTimerInterval);
+        const currentSelection = [...selectedCards];
+        resetHapUI();
+
+        if (isSingleMode) {
+            if (singleRoundComplete) return;
+            const key = [...currentSelection].sort((a, b) => a - b).join(',');
+            if (isHap(currentBoardCards, currentSelection) && !currentFoundHaps.includes(key)) {
+                currentFoundHaps.push(key);
+                singleScore += 1;
+                playSound('success');
+                updateSingleScoreboard();
+                showBanjjakAlert(`합을 찾았어요! <b style="color:var(--accent)">+1점</b><br>현재 점수: ${singleScore}점`);
+            } else {
+                singleScore -= 1;
+                updateSingleScoreboard();
+                showBanjjakAlert(`아쉽지만 합이 아니에요. <b style="color:var(--danger)">-1점</b><br>현재 점수: ${singleScore}점`);
+            }
+            return;
+        }
+        
+        const res = await fetch('api_combination_call_hap.php', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ room_code: currentRoomId, player_name: myNickname, selected_cards: currentSelection })
+        }).then(r => r.json());
+
+        if (res.status === 'success') {
+            playSound('success');
+        } else if (res.status === 'fail') {
+            applyPenalty(); // ✨ 실패 시 페널티 적용
+        }
+        showBanjjakAlert(res.message);
+    }
+
+    function resetHapUI() {
+        isSelectingHap = false;
+        if(hapTimerInterval) clearInterval(hapTimerInterval);
+        
+        selectedCards = [];
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+        
+        const btnHap = document.getElementById('btn-hap-shout');
+        btnHap.classList.remove('selecting'); 
+        
+        // ✨ 페널티 중이 아닐 때만 버튼 원래대로 복구
+        if (!isPenaltyActive) {
+            btnHap.disabled = false;
+            btnHap.innerText = "합! 외치기";
+            btnHap.style.background = "var(--danger)";
+        }
+        
+        document.getElementById('student-timer-display').classList.add('hidden');
+    }
+
+    async function callGyeol() {
+        if(isPenaltyActive) return; // ✨ 페널티 중이면 무시
+
+        if (isSingleMode) {
+            if (singleRoundComplete) return;
+            const remainingHaps = possibleHapKeys(currentBoardCards).filter(key => !currentFoundHaps.includes(key));
+            if (remainingHaps.length === 0) {
+                finishSingleRound();
+            } else {
+                singleScore -= 1;
+                updateSingleScoreboard();
+                showBanjjakAlert(`아직 찾지 못한 합이 ${remainingHaps.length}개 있어요. <b style="color:var(--danger)">-1점</b><br>현재 점수: ${singleScore}점`);
+            }
+            return;
+        }
+
+        const res = await fetch('api_combination_call_gyeol.php', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ room_code: currentRoomId, player_name: myNickname })
+        }).then(r => r.json());
+
+        if (res.status === 'success') {
+            shootConfetti();
+            playSound('success');
+        } else if (res.status === 'fail') {
+            applyPenalty(); // ✨ 결 실패 시에도 페널티 적용
+        }
+
+        showBanjjakAlert(res.message);
+    }
+
+    window.onload = function() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('room')) {
+            showStudentLogin();
+            document.getElementById('room-code-input').value = params.get('room');
+        }
+    }
+</script>
+
+<script>
+(function() {
+    // 반짝 결! 합! 통계는 더 이상 stats.json을 쓰지 않고,
+    // DB(rx_banjjak_program_stats)에 combinationgame으로 직접 집계합니다.
+    fetch('combinationgame_tracker.php?t=' + new Date().getTime(), { cache: 'no-store' })
+        .catch(function(error) { console.warn('combinationgame stats tracking failed', error); });
+})();
+</script>
+
+<script>
+(function() {
+    // 서버가 24시간 잠금으로 제한하는 점수 정리를 페이지 진입 시 요청합니다.
+    const storageKey = 'banjjak-combination-rank-cleanup-day';
+    const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
+    try {
+        if (localStorage.getItem(storageKey) === today) return;
+    } catch (error) {}
+    fetch('api_combination_single_rank.php?action=maintenance&t=' + Date.now(), { cache: 'no-store' })
+        .then(response => response.json())
+        .then(result => {
+            if (result && result.ok) {
+                try { localStorage.setItem(storageKey, today); } catch (error) {}
+            }
+        })
+        .catch(error => console.warn('combination ranking maintenance skipped', error));
+})();
+</script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a51e4872fab78b6a',t:'MTc5MzIzNjA0Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><iframe height="1" width="1" style="position: absolute; top: 0px; left: 0px; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; visibility: hidden;"></iframe><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;074a34aeb35f4fec83c5992ae31e0fd8&quot;,&quot;r&quot;:1,&quot;spa&quot;:2}" crossorigin="anonymous"></script>
+
+
+</body></html>
