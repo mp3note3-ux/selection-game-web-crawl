@@ -1,0 +1,10 @@
+{
+  "room_code": "1112",
+  "bot_count": 5,
+  "nickname_prefix": "BOT",
+  "browser": "chromium",
+  "show_browser": false,
+  "max_minutes": 30,
+  "join_delay_seconds": 0.6,
+  "action_delay_seconds": 1.7
+}
