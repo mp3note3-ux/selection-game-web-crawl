@@ -210,10 +210,54 @@ def attempt_hap(page: Page, triple: tuple[int, int, int]) -> str:
     return close_alert(page)
 
 
-def attempt_gyeol(page: Page) -> str:
-    page.locator("#btn-gyeol-shout").click(timeout=6000)
-    return close_alert(page)
+def attempt_gyeol(page: Page) -> tuple[str, dict[str, Any] | None]:
+    """
+    Call 결! and capture the game's authoritative API response.
 
+    Use the returned server status for success detection instead of relying
+    only on the Korean alert message.
+    """
+    with page.expect_response(
+        lambda response: "api_combination_call_gyeol.php" in response.url,
+        timeout=10000,
+    ) as response_info:
+        page.locator("#btn-gyeol-shout").click(timeout=6000)
+
+    response = response_info.value
+    api_result: dict[str, Any] | None = None
+    try:
+        parsed = response.json()
+        if isinstance(parsed, dict):
+            api_result = parsed
+        else:
+            api_result = {"status": "invalid_response", "http_status": response.status}
+    except (PlaywrightError, ValueError):
+        api_result = {"status": "invalid_response", "http_status": response.status}
+
+    message = close_alert(page)
+    return message, api_result
+
+
+def gyeol_succeeded(api_result: dict[str, Any] | None, message: str) -> bool:
+    """
+    Determine whether 결! succeeded, prioritizing the server response.
+
+    Explicit server failure is never overridden by alert text. Text matching is
+    only a fallback if the response doesn't include a recognized status.
+    """
+    status = str((api_result or {}).get("status", "")).strip().lower()
+    if status == "success":
+        return True
+    if status in {"fail", "failed", "error", "invalid_response"}:
+        return False
+
+    normalized = " ".join(message.split()).lower()
+    if any(marker in normalized for marker in ("실패", "아직 찾지 못", "틀렸", "오답")):
+        return False
+    return any(
+        marker in normalized
+        for marker in ("결! 성공", "결 성공", "정답입니다", "성공적으로")
+    )
 
 def canonical_board(pages: list[Page]) -> tuple[tuple[int, str] | None, list[dict[str, Any]], set[tuple[int, int, int]]]:
     samples = []
@@ -355,13 +399,17 @@ def coordinate_play(
         name = names[pages.index(actor)]
         print(f"{name} calls 결! (no remaining combinations).")
         try:
-            message = attempt_gyeol(actor)
-            print("  " + message.replace("\n", " "))
-            if "성공" in message or "정답" in message:
+            message, api_result = attempt_gyeol(actor)
+            print("  " + message.replace("\\n", " "))
+            status = str((api_result or {}).get("status", "unknown")).lower()
+            if gyeol_succeeded(api_result, message):
                 complete_board = board_key
+                print(f"  Confirmed by server response (status={status}). Waiting for the next round.")
+            else:
+                print(f"  결! was not confirmed (server status={status}); will re-check after cooldown.")
             time.sleep(action_delay)
         except (PlaywrightError, PlaywrightTimeoutError) as exc:
-            print(f"  결! interrupted: {exc}")
+            print(f"  결! interrupted before a confirmed server response: {exc}")
 
 
 def main() -> int:
